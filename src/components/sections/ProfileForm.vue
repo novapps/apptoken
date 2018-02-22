@@ -2,18 +2,18 @@
   <div id="profile-form">
     <h3>{{ this.$route.path === '/sign-up' ? 'Sign Up' : 'Edit Profile' }}</h3>
     <div class="row">
-      <label for="first-name">First name</label>
-      <input type="text" id="first-name" name="first-name" v-model="user.firstName">
-    </div>
-
-    <div class="row">
-      <label for="last-name">Last name</label>
-      <input type="text" id="Last-name" name="Last-name" v-model="user.lastName">
+      <label for="name">User Name</label>
+      <input type="text" id="name" name="name" v-model="user.name">
     </div>
 
     <div class="row">
       <label for="email">Email</label>
       <input type="text" id="email" name="email" v-model="user.email">
+    </div>
+
+    <div class="row">
+      <label for="phone">Phone number</label>
+      <input type="text" id="phone" name="phone" v-model="user.phone">
     </div>
 
     <div class="row">
@@ -32,9 +32,9 @@
         evt.target.disabled = true
         const action = this.$route.path === '/sign-up' ? 'signup' : 'editProfile'
         const userProfileData = {
-          firstName: this.user.firstName,
-          lastName: this.user.lastName,
-          email: this.user.email
+          name: this.user.name,
+          email: this.user.email,
+          phone: this.user.phone
         }
 
         Auth[action](this.$store.state, userProfileData)

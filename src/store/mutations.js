@@ -2,9 +2,9 @@ import { MUTATION_TYPES, APPROVED_NETWORK_ID } from '../util/constants'
 
 function resetUser (state, web3Status = {}) {
   const user = {
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
+    phone: '',
     isLoggedIn: false
   }
 
@@ -59,9 +59,9 @@ export default {
     const userCopy = state.user
 
     Object.assign(userCopy, {
-      firstName: userData.firstName,
-      lastName: userData.lastName,
+      name: userData.name,
       email: userData.email,
+      phone: userData.phone,
       isLoggedIn: !!(userData.email && userData.email !== '') && state.user.hasCoinbase && state.user.isConnectedToApprovedNetwork
     })
 

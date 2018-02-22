@@ -10,9 +10,9 @@ export default {
   },
   user: {
     coinbase: '',
+    name: '',
     email: '',
-    firstName: '',
-    lastName: '',
+    phone: '',
     hasCoinbase: false,
     hasWeb3InjectedBrowser: false,
     isConnectedToApprovedNetwork: false,

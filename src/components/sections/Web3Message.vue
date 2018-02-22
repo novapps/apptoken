@@ -10,7 +10,7 @@
             <br>
             <div v-if="user.hasCoinbase">
               <span v-if="user.isLoggedIn">
-                Welcome {{ user.firstName }}
+                Welcome {{ user.name }}
               </span>
               <span v-else>
                 And we can see your ethereum address [{{ coinbase }}].<br>

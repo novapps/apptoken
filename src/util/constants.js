@@ -6,10 +6,10 @@ export const NETWORKS = {
   '42': 'Kovan test network',
   '4447': 'Truffle Develop Network',
   '5777': 'Ganache Blockchain',
-  '1519286656381': 'Ganache Blockchain On LAN'
+  '1519297889864': 'Ganache Blockchain On LAN'
 }
 
-export const APPROVED_NETWORK_ID = '1519286656381'
+export const APPROVED_NETWORK_ID = '1519297889864'
 
 export const MUTATION_TYPES = {
   CHANGE_CURRENT_ROUTE_TO: 'changeCurrentRouteTo',

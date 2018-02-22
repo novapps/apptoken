@@ -15,7 +15,10 @@ class Auth {
         state,
         method: (contractInstance, coinbase) => {
           return new Promise((resolve, reject) => {
-            contractInstance.update(data.firstName, data.lastName, data.email, { from: coinbase, gas: 4444444 })
+            contractInstance.update(
+              state.web3.instance().fromUtf8(data.name),
+              state.web3.instance().fromUtf8(data.email),
+              state.web3.instance().fromUtf8(data.phone), { from: coinbase, gas: 4444444 })
             .then((result) => {
               // Successful Sign-up
               resolve(data)
@@ -38,7 +41,10 @@ class Auth {
         state,
         method: (contractInstance, coinbase) => {
           return new Promise((resolve, reject) => {
-            contractInstance.signup(data.firstName, data.lastName, data.email, { from: coinbase, gas: 4444444 })
+            contractInstance.signup(
+              state.web3.instance().fromUtf8(data.name),
+              state.web3.instance().fromUtf8(data.email),
+              state.web3.instance().fromUtf8(data.phone), { from: coinbase, gas: 4444444 })
             .then((result) => {
               // Successful Sign-up
               resolve(data)
@@ -123,9 +129,9 @@ class Auth {
   getUTF8DataOfResults (state, results) {
     const utf8Results = results.map(result => state.web3.instance().toUtf8(result))
     return {
-      firstName: utf8Results[0],
-      lastName: utf8Results[1],
-      email: utf8Results[2]
+      name: utf8Results[0],
+      email: utf8Results[1],
+      phone: utf8Results[2]
     }
   }
 }
