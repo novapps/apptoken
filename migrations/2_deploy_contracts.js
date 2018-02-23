@@ -1,8 +1,10 @@
 var Ownable = artifacts.require("./zeppelin/ownership/Ownable.sol");
 var Destructible = artifacts.require("./zeppelin/lifecycle/Destructible.sol");
-var Authentication = artifacts.require("./Authentication.sol");
 var SafeMath = artifacts.require("./zeppelin/math/SafeMath.sol");
 var PullPayment = artifacts.require("./zeppelin/payment/PullPayment.sol");
+var Authentication = artifacts.require("./Authentication.sol");
+var APPIPower = artifacts.require("./APPIPower.sol");
+var APPIToken = artifacts.require("./APPIToken.sol");
 
 module.exports = function(deployer) {
   deployer.deploy(Ownable);
@@ -13,4 +15,5 @@ module.exports = function(deployer) {
   deployer.deploy(SafeMath);
   deployer.link(SafeMath, PullPayment);
   deployer.deploy(PullPayment);
+  deployer.deploy(APPIPower).then(() => deployer.deploy(APPIToken, APPIPower.address, 2, 8));
 };
