@@ -1,9 +1,9 @@
 pragma solidity ^0.4.18;
 
-import "./zeppelin/token/ERC20/CappedToken.sol";
+import "./MinableToken.sol";
 import "./APPIPower.sol";
 
-contract APPIToken is CappedToken {
+contract APPIToken is MinableToken {
   string public name = "Application Incentive Token";
   string public symbol = "APPIT";
   uint256 public decimals = 18;
@@ -18,17 +18,22 @@ contract APPIToken is CappedToken {
 
   uint256 public startTime;
 
+  uint256 initPower;
+  uint256 powerSupply;
+  mapping(address => uint256) powers;
+
   mapping (address => uint256) miningEarnings;
   mapping (address => uint256) lastMineTimes;
 
-  APPIPower internal appiPower;
-
   event Burn(address indexed burner, uint256 value);
-  event Reward(address indexed burner, uint256 value);
+  event Mine(address indexed miner, uint256 value);
+  event MintPower(address indexed to, uint256 amount);
+  event TransferPower(address indexed from, address indexed to, uint256 value);
 
-  function APPIToken(address _powerContractAddress, uint32 _capBase, uint32 _capDecimals) CappedToken(_capBase * 10 ** (_capDecimals + decimals)) public {
-    appiPower = APPIPower(_powerContractAddress);
+  function APPIToken(uint32 _capBase, uint32 _capDecimals, uint32 _initPower, uint32 _reservedPower) MinableToken(_capBase * 10 ** (_capDecimals + decimals)) public {
     startTime = now;
+    initPower = _initPower;
+    mintPower(msg.sender, _reservedPower);
   }
 
   function setup(string _name, string _symbol, uint256 _decimals) external onlyOwner {
@@ -49,17 +54,41 @@ contract APPIToken is CappedToken {
     miningSpeedDurations = _miningSpeedDurations;
   }
 
-  function setPowerContract(address _address) external onlyOwner {
-    require(_address != address(0));
-    appiPower = APPIPower(_address);
-  }
-
   function getTotalSupply() external view returns (uint256) {
     return totalSupply();
   }
 
   function getBalance() external view returns (uint256) {
     return balanceOf(msg.sender);
+  }
+
+  function transferPower(address _to, uint256 _value) public returns (bool) {
+    require(_to != address(0));
+    require(_value <= powers[msg.sender]);
+    powers[msg.sender] = powers[msg.sender].sub(_value);
+    powers[_to] = powers[_to].add(_value);
+    TransferPower(msg.sender, _to, _value);
+    return true;
+  }
+
+  function powerOf(address _owner) public view returns (uint256) {
+    return powers[_owner];
+  }
+
+  function getPowerSupply() external view returns (uint256) {
+    return powerSupply;
+  }
+
+  function getPower() external view returns (uint256) {
+    return powerOf(msg.sender);
+  }
+
+  function mintPower(address _to, uint256 _amount) internal returns (bool) {
+    powerSupply = powerSupply.add(_amount);
+    powers[_to] = powers[_to].add(_amount);
+    MintPower(_to, _amount);
+    TransferPower(address(0), _to, _amount);
+    return true;
   }
 
   /**
@@ -77,7 +106,7 @@ contract APPIToken is CappedToken {
     Burn(burner, _value);
   }
 
-  function miningSpeed() private view returns (uint256) {
+  function miningSpeedOf(address _owner) public view returns (uint256) {
     uint256 speed = initMiningSpeed;
     if (now > startTime) {
       uint256 duration = now - startTime;
@@ -88,15 +117,15 @@ contract APPIToken is CappedToken {
         }
       }
     }
-    return speed.mul(appiPower.getBalance()).div(appiPower.getTotalSupply());
+    return speed.mul(powerOf(_owner)).div(powerSupply);
   }
 
   function getMiningSpeed() external view returns (uint256) {
-    return miningSpeed();
+    return miningSpeedOf(msg.sender);
   }
 
-  function miningEarning() private view returns (uint256) {
-    uint256 lastTime = lastMineTimes[msg.sender];
+  function miningEarningOf(address _owner) public view returns (uint256) {
+    uint256 lastTime = lastMineTimes[_owner];
     require(lastTime < now);
     uint256 earning = 0;
     if (lastTime == 0) {
@@ -106,18 +135,21 @@ contract APPIToken is CappedToken {
       if (miningTime > maxMiningTime) {
         miningTime = maxMiningTime;
       }
-      earning = miningTime.mul(miningSpeed()).add(miningEarnings[msg.sender]);
+      earning = miningTime.mul(miningSpeedOf(_owner)).add(miningEarnings[_owner]);
     }
     return earning;
   }
 
   function getMiningEarning() external view returns (uint256) {
-    return miningEarning();
+    return miningEarningOf(msg.sender);
   }
 
-  function mine() public returns (uint256) {
-    uint256 earning = miningEarning();
-    mint(msg.sender, earning);
+  function mine() external returns (uint256) {
+    if (powerOf(msg.sender) == 0) {
+      mintPower(msg.sender, initPower);
+    }
+    uint256 earning = miningEarningOf(msg.sender);
+    mine(msg.sender, earning);
     lastMineTimes[msg.sender] = now;
     miningEarnings[msg.sender] = 0;
     return balanceOf(msg.sender);

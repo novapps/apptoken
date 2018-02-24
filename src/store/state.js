@@ -18,7 +18,7 @@ export default {
     isConnectedToApprovedNetwork: false,
     isLoggedIn: false,
     miningEarning: 0,
-    balance: 0,
-    power: 0
+    tokenBalance: 0,
+    powerBalance: 0
   }
 }

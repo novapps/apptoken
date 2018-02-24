@@ -6,9 +6,7 @@ export default {
   [ACTION_TYPES.REGISTER_WEB3_INSTANCE] ({ commit, dispatch }) {
     return new Promise(function (resolve, reject) {
       // Try to initialize web3
-      console.log('registerWeb3Instance')
-      getWeb3
-      .then((result) => {
+      getWeb3.then((result) => {
         commit(MUTATION_TYPES.REGISTER_WEB3_INSTANCE, {
           result,
           callback: (state) => {
@@ -16,8 +14,7 @@ export default {
             resolve()
           }
         })
-      })
-      .catch((e) => {
+      }).catch((e) => {
         if (e.result) {
           const result = e.result
           commit(MUTATION_TYPES.REGISTER_WEB3_INSTANCE, {
@@ -35,8 +32,8 @@ export default {
       })
     })
   },
-  [ACTION_TYPES.UPDATE_WEB3_PROPERTIES] ({ commit }, payload) {
-    commit(MUTATION_TYPES.UPDATE_WEB3_PROPERTIES, payload)
+  [ACTION_TYPES.UPDATE_PROPERTIES] ({ commit }, payload) {
+    commit(MUTATION_TYPES.UPDATE_PROPERTIES, payload)
   },
   [ACTION_TYPES.UPDATE_USER_BLOCKCHAIN_STATUS] ({ commit }) {
     commit(MUTATION_TYPES.UPDATE_USER_BLOCKCHAIN_STATUS)

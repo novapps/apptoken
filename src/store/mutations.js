@@ -49,9 +49,9 @@ export default {
       resetUser(state, web3Status)
     }
   },
-  [MUTATION_TYPES.UPDATE_WEB3_PROPERTIES] (state, payload) {
+  [MUTATION_TYPES.UPDATE_PROPERTIES] (state, payload) {
     for (var i = payload.properties.length - 1; i >= 0; i--) {
-      state.web3[payload.properties[i]] = payload.values[i]
+      if (state.web3[payload.properties[i]]) state.web3[payload.properties[i]] = payload.values[i]
       if (state.user[payload.properties[i]]) state.user[payload.properties[i]] = payload.values[i]
     }
   },

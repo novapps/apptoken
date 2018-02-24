@@ -15,5 +15,5 @@ module.exports = function(deployer) {
   deployer.deploy(SafeMath);
   deployer.link(SafeMath, PullPayment);
   deployer.deploy(PullPayment);
-  deployer.deploy(APPIPower, 1000).then(() => deployer.deploy(APPIToken, APPIPower.address, 1, 8));
+  deployer.deploy(APPIToken, 1, 8, 1, 1000);
 };
