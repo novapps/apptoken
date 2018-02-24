@@ -9,13 +9,16 @@ export default {
     networkId: null
   },
   user: {
-    coinbase: '',
     name: '',
     email: '',
     phone: '',
+    coinbase: '',
     hasCoinbase: false,
     hasWeb3InjectedBrowser: false,
     isConnectedToApprovedNetwork: false,
-    isLoggedIn: false
+    isLoggedIn: false,
+    miningEarning: 0,
+    balance: 0,
+    power: 0
   }
 }

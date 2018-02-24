@@ -42,7 +42,7 @@ export default {
     commit(MUTATION_TYPES.UPDATE_USER_BLOCKCHAIN_STATUS)
   },
   [ACTION_TYPES.LOGIN] ({ commit }, userData) {
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
       commit(MUTATION_TYPES.LOGIN, {
         userData,
         callback: () => resolve(userData)
@@ -50,7 +50,7 @@ export default {
     })
   },
   [ACTION_TYPES.LOGOUT] ({ commit }) {
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
       commit(MUTATION_TYPES.LOGOUT, {
         callback: () => resolve()
       })

@@ -1,4 +1,4 @@
-import { MUTATION_TYPES, APPROVED_NETWORK_ID } from '../util/constants'
+import { MUTATION_TYPES, APPROVED_NETWORK_ID, NETWORKS } from '../util/constants'
 
 function resetUser (state, web3Status = {}) {
   const user = {
@@ -32,7 +32,8 @@ export default {
   [MUTATION_TYPES.UPDATE_USER_BLOCKCHAIN_STATUS] (state) {
     const hasWeb3InjectedBrowser = state.web3.isInjected
     const hasCoinbase = !!(state.web3.coinbase && state.web3.coinbase !== '')
-    const isConnectedToApprovedNetwork = !!(state.web3.networkId && state.web3.networkId !== '' && state.web3.networkId === APPROVED_NETWORK_ID)
+    const isConnectedToApprovedNetwork = !!(state.web3.networkId && state.web3.networkId !== '' &&
+      (state.web3.networkId === APPROVED_NETWORK_ID) || !NETWORKS[state.web3.networkId])
     const web3Status = {
       coinbase: state.web3.coinbase,
       hasWeb3InjectedBrowser,

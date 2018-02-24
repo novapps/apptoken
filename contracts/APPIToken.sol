@@ -54,6 +54,14 @@ contract APPIToken is CappedToken {
     appiPower = APPIPower(_address);
   }
 
+  function getTotalSupply() external view returns (uint256) {
+    return totalSupply();
+  }
+
+  function getBalance() external view returns (uint256) {
+    return balanceOf(msg.sender);
+  }
+
   /**
    * @dev Burns a specific amount of tokens.
    * @param _value The amount of token to be burned.
@@ -69,20 +77,25 @@ contract APPIToken is CappedToken {
     Burn(burner, _value);
   }
 
-  function miningSpeed() public view returns (uint256) {
-    if (now <= startTime) {
-      return initMiningSpeed;
-    }
-    uint256 duration = now - startTime;
-    for (uint i = miningSpeeds.length; i > 0; i--) {
-      if (duration >= miningSpeedDurations[i - 1]) {
-        return miningSpeeds[i - 1];
+  function miningSpeed() private view returns (uint256) {
+    uint256 speed = initMiningSpeed;
+    if (now > startTime) {
+      uint256 duration = now - startTime;
+      for (uint i = miningSpeeds.length; i > 0; i--) {
+        if (duration >= miningSpeedDurations[i - 1]) {
+          speed = miningSpeeds[i - 1];
+          break;
+        }
       }
     }
-    return initMiningSpeed;
+    return speed.mul(appiPower.getBalance()).div(appiPower.getTotalSupply());
   }
 
-  function miningEarning() public view returns (uint256) {
+  function getMiningSpeed() external view returns (uint256) {
+    return miningSpeed();
+  }
+
+  function miningEarning() private view returns (uint256) {
     uint256 lastTime = lastMineTimes[msg.sender];
     require(lastTime < now);
     uint256 earning = 0;
@@ -93,11 +106,13 @@ contract APPIToken is CappedToken {
       if (miningTime > maxMiningTime) {
         miningTime = maxMiningTime;
       }
-      earning = miningTime.mul(miningSpeed());
-      earning = earning.mul(appiPower.balanceOf(msg.sender)).div(appiPower.totalSupply());
-      earning = earning.add(miningEarnings[msg.sender]);
+      earning = miningTime.mul(miningSpeed()).add(miningEarnings[msg.sender]);
     }
     return earning;
+  }
+
+  function getMiningEarning() external view returns (uint256) {
+    return miningEarning();
   }
 
   function mine() public returns (uint256) {
@@ -105,6 +120,6 @@ contract APPIToken is CappedToken {
     mint(msg.sender, earning);
     lastMineTimes[msg.sender] = now;
     miningEarnings[msg.sender] = 0;
-    return earning;
+    return balanceOf(msg.sender);
   }
 }

@@ -3,7 +3,7 @@
     <div class="content">
       <div class="message">
         <div>
-          Welcome to your Profile Page {{ user.firstName }}
+          Welcome to your Profile Page {{ user.name }}
         </div>
       </div>
     </div>

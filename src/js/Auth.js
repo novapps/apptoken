@@ -11,25 +11,22 @@ class Auth {
 
   editProfile (state = null, data = {}) {
     return new Promise((resolve, reject) => {
-      this.accessAuthenticationContractWith({
-        state,
+      this.accessAuthenticationContractWith({state,
         method: (contractInstance, coinbase) => {
           return new Promise((resolve, reject) => {
             contractInstance.update(
               state.web3.instance().fromUtf8(data.name),
               state.web3.instance().fromUtf8(data.email),
-              state.web3.instance().fromUtf8(data.phone), { from: coinbase, gas: 4444444 })
-            .then((result) => {
+              state.web3.instance().fromUtf8(data.phone),
+              { from: coinbase, gas: 4444444 }).then((result) => {
               // Successful Sign-up
-              resolve(data)
-            })
-            .catch((e) => {
-              reject(e)
-            })
+                resolve(data)
+              }).catch((e) => {
+                reject(e)
+              })
           })
         }
-      })
-      .then((result) => {
+      }).then((result) => {
         resolve(result)
       })
     })
@@ -37,28 +34,24 @@ class Auth {
 
   signup (state = null, data = {}) {
     return new Promise((resolve, reject) => {
-      this.accessAuthenticationContractWith({
-        state,
+      this.accessAuthenticationContractWith({state,
         method: (contractInstance, coinbase) => {
           return new Promise((resolve, reject) => {
             contractInstance.signup(
               state.web3.instance().fromUtf8(data.name),
               state.web3.instance().fromUtf8(data.email),
-              state.web3.instance().fromUtf8(data.phone), { from: coinbase, gas: 4444444 })
-            .then((result) => {
+              state.web3.instance().fromUtf8(data.phone),
+              { from: coinbase, gas: 4444444 }).then((result) => {
               // Successful Sign-up
-              resolve(data)
-            })
-            .catch((e) => {
-              reject(e)
-            })
+                resolve(data)
+              }).catch((e) => {
+                reject(e)
+              })
           })
         }
-      })
-      .then((result) => {
+      }).then((result) => {
         resolve(result)
-      })
-      .catch((err) => {
+      }).catch((err) => {
         reject(err)
       })
     })
@@ -66,25 +59,20 @@ class Auth {
 
   login (state = null) {
     return new Promise((resolve, reject) => {
-      this.accessAuthenticationContractWith({
-        state,
+      this.accessAuthenticationContractWith({state,
         method: (contractInstance, coinbase) => {
           return new Promise((resolve, reject) => {
-            contractInstance.login({from: coinbase})
-            .then((result) => {
+            contractInstance.login({from: coinbase}).then((result) => {
               // Successful Fetch
               resolve(this.getUTF8DataOfResults(state, result))
-            })
-            .catch((e) => {
+            }).catch((e) => {
               reject(e)
             })
           })
         }
-      })
-      .then((result) => {
+      }).then((result) => {
         resolve(result)
-      })
-      .catch((err) => {
+      }).catch((err) => {
         reject(err)
       })
     })
@@ -92,36 +80,32 @@ class Auth {
 
   accessAuthenticationContractWith (dataObject = {}) {
     const state = dataObject.state
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
       if (!state || !state.web3 || !(state.web3.instance)) {
         reject('Web3 is not initialised. Use a Web3 injector')
-      } else {
-        if (state.web3.networkId === APPROVED_NETWORK_ID) {
-          let authContract = contract(AuthContract)
-          authContract.setProvider(state.web3.instance().currentProvider)
-          state.web3.instance().eth.getCoinbase((err, coinbase) => {
-            if (err) {
-              console.error(':::Unable to get coinbase for this operation')
-              reject(err)
-            } else {
-              authContract.deployed()
-              .then((contractInstance) => {
-                dataObject.method(contractInstance, coinbase)
-                .then((result) => {
-                  resolve(result)
-                })
-                .catch((err) => {
-                  reject(err)
-                })
-              })
-              .catch((err) => {
+      } else if (state.web3.networkId) {
+        let authContract = contract(AuthContract)
+        authContract.setProvider(state.web3.instance().currentProvider)
+        state.web3.instance().eth.getCoinbase((err, coinbase) => {
+          if (err) {
+            console.error(':::Unable to get coinbase for this operation')
+            reject(err)
+          } else {
+            authContract.deployed().then((contractInstance) => {
+              dataObject.method(contractInstance, coinbase).then((result) => {
+                resolve(result)
+              }).catch((err) => {
                 reject(err)
               })
-            }
-          })
-        } else {
-          reject(`You are NOT connected to the ${NETWORKS[APPROVED_NETWORK_ID]} on which this dApp runs.`)
-        }
+            }).catch((err) => {
+              reject(err)
+            })
+          }
+        })
+      } else {
+        var network = NETWORKS[APPROVED_NETWORK_ID]
+        if (!network) { network = 'Ganache Blockchain On LAN' }
+        reject(`You are NOT connected to the ${network} on which this dApp runs.`)
       }
     })
   }
