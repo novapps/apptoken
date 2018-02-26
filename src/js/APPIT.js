@@ -1,6 +1,5 @@
 import contract from 'truffle-contract'
 import APPIToken from '../../build/contracts/APPIToken.json'
-import { APPROVED_NETWORK_ID, NETWORKS } from '../util/constants'
 
 let appit = null
 class APPIT {
@@ -9,15 +8,16 @@ class APPIT {
     return appit
   }
 
-  getTotalSupply (web3, coinbase) {
+  getTotalSupply (web3) {
     return new Promise((resolve, reject) => {
       this.accessAPPIPowerContractWith({
         web3,
-        callback: (contractInstance) => {
+        callback: (contractInstance, coinbase) => {
           return new Promise((resolve, reject) => {
             contractInstance.getTotalSupply({ from: coinbase }).then((result) => {
-              console.log('tokenTotalSupply: ' + result)
-              resolve(result)
+              let supply = web3.fromWei(result.toNumber(), 'ether')
+              console.log('tokenTotalSupply: ' + supply)
+              resolve(supply)
             }).catch((e) => {
               reject(e)
             })
@@ -29,15 +29,16 @@ class APPIT {
     })
   }
 
-  getBalance (web3, coinbase) {
+  getBalance (web3) {
     return new Promise((resolve, reject) => {
       this.accessAPPITokenContractWith({
         web3,
-        callback: (contractInstance) => {
+        callback: (contractInstance, coinbase) => {
           return new Promise((resolve, reject) => {
             contractInstance.getBalance({ from: coinbase }).then((result) => {
-              console.log('tokenBalance: ' + result)
-              resolve(result)
+              let balance = web3.fromWei(result.toNumber(), 'ether')
+              console.log('tokenBalance: ' + balance)
+              resolve(balance)
             }).catch((e) => {
               reject(e)
             })
@@ -49,15 +50,16 @@ class APPIT {
     })
   }
 
-  getPower (web3, coinbase) {
+  getPower (web3) {
     return new Promise((resolve, reject) => {
       this.accessAPPITokenContractWith({
         web3,
-        callback: (contractInstance) => {
+        callback: (contractInstance, coinbase) => {
           return new Promise((resolve, reject) => {
             contractInstance.getPower({ from: coinbase }).then((result) => {
-              console.log('power: ' + result)
-              resolve(result)
+              let power = result.toNumber()
+              console.log('power: ' + power)
+              resolve(power)
             }).catch((e) => {
               reject(e)
             })
@@ -69,15 +71,58 @@ class APPIT {
     })
   }
 
-  getMiningSpeed (web3, coinbase) {
+  getStartTime (web3) {
     return new Promise((resolve, reject) => {
       this.accessAPPITokenContractWith({
         web3,
-        callback: (contractInstance) => {
+        callback: (contractInstance, coinbase) => {
+          return new Promise((resolve, reject) => {
+            contractInstance.getStartTime({ from: coinbase }).then((result) => {
+              let time = result.toNumber()
+              console.log('startTime: ' + time)
+              resolve(time)
+            }).catch((e) => {
+              reject(e)
+            })
+          })
+        }
+      }).then((result) => {
+        resolve(result)
+      })
+    })
+  }
+
+  getTimeNow (web3) {
+    return new Promise((resolve, reject) => {
+      this.accessAPPITokenContractWith({
+        web3,
+        callback: (contractInstance, coinbase) => {
+          return new Promise((resolve, reject) => {
+            contractInstance.getTimeNow({ from: coinbase }).then((result) => {
+              let now = result.toNumber()
+              console.log('now: ' + now)
+              resolve(now)
+            }).catch((e) => {
+              reject(e)
+            })
+          })
+        }
+      }).then((result) => {
+        resolve(result)
+      })
+    })
+  }
+
+  getMiningSpeed (web3) {
+    return new Promise((resolve, reject) => {
+      this.accessAPPITokenContractWith({
+        web3,
+        callback: (contractInstance, coinbase) => {
           return new Promise((resolve, reject) => {
             contractInstance.getMiningSpeed({ from: coinbase }).then((result) => {
-              console.log('miningSpeed: ' + result)
-              resolve(result)
+              let speed = web3.fromWei(result.toNumber(), 'ether')
+              console.log('miningSpeed: ' + speed)
+              resolve(speed)
             }).catch((e) => {
               reject(e)
             })
@@ -89,15 +134,58 @@ class APPIT {
     })
   }
 
-  getMiningEarning (web3, coinbase) {
+  getLastMiningTime (web3) {
     return new Promise((resolve, reject) => {
       this.accessAPPITokenContractWith({
         web3,
-        callback: (contractInstance) => {
+        callback: (contractInstance, coinbase) => {
+          return new Promise((resolve, reject) => {
+            contractInstance.getLastMiningTime({ from: coinbase }).then((result) => {
+              let time = result.toNumber()
+              console.log('lastMiningTime: ' + time)
+              resolve(time)
+            }).catch((e) => {
+              reject(e)
+            })
+          })
+        }
+      }).then((result) => {
+        resolve(result)
+      })
+    })
+  }
+
+  getMiningTime (web3) {
+    return new Promise((resolve, reject) => {
+      this.accessAPPITokenContractWith({
+        web3,
+        callback: (contractInstance, coinbase) => {
+          return new Promise((resolve, reject) => {
+            contractInstance.getMiningTime({ from: coinbase }).then((result) => {
+              let time = result.toNumber()
+              console.log('miningTime: ' + time)
+              resolve(time)
+            }).catch((e) => {
+              reject(e)
+            })
+          })
+        }
+      }).then((result) => {
+        resolve(result)
+      })
+    })
+  }
+
+  getMiningEarning (web3) {
+    return new Promise((resolve, reject) => {
+      this.accessAPPITokenContractWith({
+        web3,
+        callback: (contractInstance, coinbase) => {
           return new Promise((resolve, reject) => {
             contractInstance.getMiningEarning({ from: coinbase }).then((result) => {
-              console.log('miningEarning: ' + result)
-              resolve(result)
+              let earning = web3.fromWei(result.toNumber(), 'ether')
+              console.log('miningEarning: ' + earning)
+              resolve(earning)
             }).catch((e) => {
               reject(e)
             })
@@ -109,16 +197,17 @@ class APPIT {
     })
   }
 
-  mine (web3, coinbase) {
+  mine (web3) {
     return new Promise((resolve, reject) => {
       this.accessAPPITokenContractWith({
         web3,
-        callback: (contractInstance) => {
+        callback: (contractInstance, coinbase) => {
           return new Promise((resolve, reject) => {
-            contractInstance.mine({ from: coinbase, gas: 4444444 }).then((result) => {
+            contractInstance.mine({ from: coinbase, gas: 6000000 }).then((result) => {
               contractInstance.getBalance({ from: coinbase }).then((result) => {
-                console.log('token after minning: ' + result)
-                resolve(result)
+                let balance = web3.fromWei(result.toNumber(), 'ether')
+                console.log('token after minning: ' + balance)
+                resolve(balance)
               }).catch((e) => {
                 reject(e)
               })
@@ -138,22 +227,25 @@ class APPIT {
     return new Promise((resolve, reject) => {
       if (!web3) {
         reject('Web3 is not initialised. Use a Web3 injector')
-      } else if (web3.networkId) {
+      } else {
         let tokenContract = contract(APPIToken)
         tokenContract.setProvider(web3.currentProvider)
-        tokenContract.deployed().then((contractInstance) => {
-          params.callback(contractInstance).then((result) => {
-            resolve(result)
-          }).catch((err) => {
+        web3.eth.getCoinbase((err, coinbase) => {
+          if (err) {
+            console.error(':::Unable to get coinbase for this operation')
             reject(err)
-          })
-        }).catch((err) => {
-          reject(err)
+          } else {
+            tokenContract.deployed().then((contractInstance) => {
+              params.callback(contractInstance, coinbase).then((result) => {
+                resolve(result)
+              }).catch((err) => {
+                reject(err)
+              })
+            }).catch((err) => {
+              reject(err)
+            })
+          }
         })
-      } else {
-        var network = NETWORKS[APPROVED_NETWORK_ID]
-        if (!network) { network = 'Ganache Blockchain On LAN' }
-        reject(`You are NOT connected to the ${network} on which this dApp runs.`)
       }
     })
   }

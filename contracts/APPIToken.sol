@@ -23,7 +23,7 @@ contract APPIToken is MinableToken {
   mapping(address => uint256) powers;
 
   mapping (address => uint256) miningEarnings;
-  mapping (address => uint256) lastMineTimes;
+  mapping (address => uint256) lastMiningTimes;
 
   event Burn(address indexed burner, uint256 value);
   event Mine(address indexed miner, uint256 value);
@@ -33,7 +33,7 @@ contract APPIToken is MinableToken {
   function APPIToken(uint32 _capBase, uint32 _capDecimals, uint32 _initPower, uint32 _reservedPower) MinableToken(_capBase * 10 ** (_capDecimals + decimals)) public {
     startTime = now;
     initPower = _initPower;
-    mintPower(msg.sender, _reservedPower);
+    powerSupply = _reservedPower;
   }
 
   function setup(string _name, string _symbol, uint256 _decimals) external onlyOwner {
@@ -106,6 +106,14 @@ contract APPIToken is MinableToken {
     Burn(burner, _value);
   }
 
+  function getStartTime() external view returns (uint256) {
+    return startTime;
+  }
+
+  function getTimeNow() external view returns (uint256) {
+    return now;
+  }
+
   function miningSpeedOf(address _owner) public view returns (uint256) {
     uint256 speed = initMiningSpeed;
     if (now > startTime) {
@@ -124,18 +132,37 @@ contract APPIToken is MinableToken {
     return miningSpeedOf(msg.sender);
   }
 
+  function lastMiningTimeOf(address _owner) public view returns (uint256) {
+    return lastMiningTimes[_owner];
+  }
+
+  function getLastMiningTime() external view returns (uint256) {
+    return lastMiningTimeOf(msg.sender);
+  }
+
+  function miningTimeOf(address _owner) public view returns (uint256) {
+    uint256 lastTime = lastMiningTimes[_owner];
+    require(lastTime <= now);
+    uint256 miningTime = now - lastTime;
+    if (miningTime > maxMiningTime) {
+      miningTime = maxMiningTime;
+    }
+    return miningTime;
+  }
+
+  function getMiningTime() external view returns (uint256) {
+    return miningTimeOf(msg.sender);
+  }
+
   function miningEarningOf(address _owner) public view returns (uint256) {
-    uint256 lastTime = lastMineTimes[_owner];
-    require(lastTime < now);
+    uint256 lastTime = lastMiningTimes[_owner];
     uint256 earning = 0;
     if (lastTime == 0) {
       earning = initMiningEarning;
     } else {
-      uint256 miningTime = now - lastTime;
-      if (miningTime > maxMiningTime) {
-        miningTime = maxMiningTime;
-      }
-      earning = miningTime.mul(miningSpeedOf(_owner)).add(miningEarnings[_owner]);
+      uint256 miningSpeed = miningSpeedOf(_owner);
+      uint256 miningTime = miningTimeOf(_owner);
+      earning = miningEarnings[_owner].add(miningSpeed.mul(miningTime));
     }
     return earning;
   }
@@ -150,7 +177,7 @@ contract APPIToken is MinableToken {
     }
     uint256 earning = miningEarningOf(msg.sender);
     mine(msg.sender, earning);
-    lastMineTimes[msg.sender] = now;
+    lastMiningTimes[msg.sender] = now;
     miningEarnings[msg.sender] = 0;
     return balanceOf(msg.sender);
   }
