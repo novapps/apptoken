@@ -2,12 +2,12 @@
   <div id="header-template" class="sticky header">
     <div class="content">
       <router-link to="/" class="logo"></router-link>
-      <div class="links">
+      <!--<div class="links">
         <router-link to="/sign-up" class="link1" v-if="!user.isLoggedIn">Sign Up</router-link> <span v-if="!user.isLoggedIn" class="divider"></span>
         <input type="button" class="link1" v-if="!user.isLoggedIn" value="Login" @click="logUserIn"> <span v-if="!user.isLoggedIn" class="divider"></span>
         <router-link to="/profile/edit" class="link2" v-if="user.isLoggedIn">Edit Profile</router-link> <span v-if="user.isLoggedIn" class="divider"></span>
         <input type="button" class="link2" v-if="user.isLoggedIn" value="Logout" @click="logUserOut">
-      </div>
+      </div -->
     </div>
   </div>
 </template>

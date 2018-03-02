@@ -1,8 +1,8 @@
 export default {
   currentRoute: null,
   web3: {
-    address: null,
     coinbase: null,
+    accounts: [],
     error: null,
     instance: null,
     isInjected: false,

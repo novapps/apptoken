@@ -43,8 +43,6 @@ const monitorWeb3 = (state) => {
           properties: ['powerBalance'],
           values: [ powerBalance ]
         })
-        APPIT.getMiningSpeed(web3)
-        APPIT.getStartTime(web3)
         if (web3Injected) {
           setInterval(() => {
             web3.version.getNetwork((err, newNetworkId) => {

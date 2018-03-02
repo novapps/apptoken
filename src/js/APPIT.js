@@ -1,11 +1,41 @@
 import contract from 'truffle-contract'
-import APPIToken from '../../build/contracts/APPIToken.json'
+// import APPIToken from '../../build/contracts/APPIToken.json'
+import TokenABI from '../../build/APPIToken.json'
+const TokenAddress = '0x3158CC29483Ab7822a46718B7b2190f4105Ef7C3'
 
 let appit = null
 class APPIT {
   constructor () {
     appit = appit || this
     return appit
+  }
+
+  accessAPPITokenContractWith (params = {}) {
+    const web3 = params.web3
+    return new Promise((resolve, reject) => {
+      if (!web3) {
+        reject('Web3 is not initialised. Use a Web3 injector')
+      } else {
+        let tokenContract = contract({contractName: 'APPIToken', abi: TokenABI})
+        tokenContract.setProvider(web3.currentProvider)
+        web3.eth.getCoinbase((err, coinbase) => {
+          if (err) {
+            console.error(':::Unable to get coinbase for this operation')
+            reject(err)
+          } else {
+            tokenContract.at(TokenAddress).then((contractInstance) => {
+              params.callback(contractInstance, coinbase).then((result) => {
+                resolve(result)
+              }).catch((err) => {
+                reject(err)
+              })
+            }).catch((err) => {
+              reject(err)
+            })
+          }
+        })
+      }
+    })
   }
 
   getTotalSupply (web3) {
@@ -203,7 +233,7 @@ class APPIT {
         web3,
         callback: (contractInstance, coinbase) => {
           return new Promise((resolve, reject) => {
-            contractInstance.mine({ from: coinbase, gas: 6000000 }).then((result) => {
+            contractInstance.mine({ from: coinbase, gas: 4444444, gasPrice: 200000000 }).then((result) => {
               contractInstance.getBalance({ from: coinbase }).then((result) => {
                 let balance = web3.fromWei(result.toNumber(), 'ether')
                 console.log('token after minning: ' + balance)
@@ -219,34 +249,6 @@ class APPIT {
       }).then((result) => {
         resolve(result)
       })
-    })
-  }
-
-  accessAPPITokenContractWith (params = {}) {
-    const web3 = params.web3
-    return new Promise((resolve, reject) => {
-      if (!web3) {
-        reject('Web3 is not initialised. Use a Web3 injector')
-      } else {
-        let tokenContract = contract(APPIToken)
-        tokenContract.setProvider(web3.currentProvider)
-        web3.eth.getCoinbase((err, coinbase) => {
-          if (err) {
-            console.error(':::Unable to get coinbase for this operation')
-            reject(err)
-          } else {
-            tokenContract.deployed().then((contractInstance) => {
-              params.callback(contractInstance, coinbase).then((result) => {
-                resolve(result)
-              }).catch((err) => {
-                reject(err)
-              })
-            }).catch((err) => {
-              reject(err)
-            })
-          }
-        })
-      }
     })
   }
 

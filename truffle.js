@@ -6,6 +6,12 @@ module.exports = {
       network_id: "5777", // Match any network id. You may need to replace * with your network Id
       from: "", // Add your unlocked account within the double quotes
       gas: 4444444
+    },
+    ropsten: {
+      network_id: 3,
+      host: '192.168.0.18',
+      port: 8545,
+      from: '0x883Dd06cA280b1CD3779397cCA1BE5687cDE1b1b'
     }
   }
 };
