@@ -46,7 +46,7 @@ class APPIT {
           return new Promise((resolve, reject) => {
             contractInstance.getTotalSupply({ from: coinbase }).then((result) => {
               let supply = web3.fromWei(result.toNumber(), 'ether')
-              console.log('tokenTotalSupply: ' + supply)
+              // console.log('tokenTotalSupply: ' + supply)
               resolve(supply)
             }).catch((e) => {
               reject(e)
@@ -67,7 +67,7 @@ class APPIT {
           return new Promise((resolve, reject) => {
             contractInstance.getBalance({ from: coinbase }).then((result) => {
               let balance = web3.fromWei(result.toNumber(), 'ether')
-              console.log('tokenBalance: ' + balance)
+              // console.log('tokenBalance: ' + balance)
               resolve(balance)
             }).catch((e) => {
               reject(e)
@@ -88,7 +88,7 @@ class APPIT {
           return new Promise((resolve, reject) => {
             contractInstance.getPower({ from: coinbase }).then((result) => {
               let power = result.toNumber()
-              console.log('power: ' + power)
+              // console.log('power: ' + power)
               resolve(power)
             }).catch((e) => {
               reject(e)
@@ -109,7 +109,7 @@ class APPIT {
           return new Promise((resolve, reject) => {
             contractInstance.getStartTime({ from: coinbase }).then((result) => {
               let time = result.toNumber()
-              console.log('startTime: ' + time)
+              // console.log('startTime: ' + time)
               resolve(time)
             }).catch((e) => {
               reject(e)
@@ -130,7 +130,7 @@ class APPIT {
           return new Promise((resolve, reject) => {
             contractInstance.getTimeNow({ from: coinbase }).then((result) => {
               let now = result.toNumber()
-              console.log('now: ' + now)
+              // console.log('now: ' + now)
               resolve(now)
             }).catch((e) => {
               reject(e)
@@ -151,7 +151,7 @@ class APPIT {
           return new Promise((resolve, reject) => {
             contractInstance.getMiningSpeed({ from: coinbase }).then((result) => {
               let speed = web3.fromWei(result.toNumber(), 'ether')
-              console.log('miningSpeed: ' + speed)
+              // console.log('miningSpeed: ' + speed)
               resolve(speed)
             }).catch((e) => {
               reject(e)
@@ -172,7 +172,7 @@ class APPIT {
           return new Promise((resolve, reject) => {
             contractInstance.getLastMiningTime({ from: coinbase }).then((result) => {
               let time = result.toNumber()
-              console.log('lastMiningTime: ' + time)
+              // console.log('lastMiningTime: ' + time)
               resolve(time)
             }).catch((e) => {
               reject(e)
@@ -193,7 +193,7 @@ class APPIT {
           return new Promise((resolve, reject) => {
             contractInstance.getMiningTime({ from: coinbase }).then((result) => {
               let time = result.toNumber()
-              console.log('miningTime: ' + time)
+              // console.log('miningTime: ' + time)
               resolve(time)
             }).catch((e) => {
               reject(e)
@@ -214,7 +214,7 @@ class APPIT {
           return new Promise((resolve, reject) => {
             contractInstance.getMiningEarning({ from: coinbase }).then((result) => {
               let earning = web3.fromWei(result.toNumber(), 'ether')
-              console.log('miningEarning: ' + earning)
+              // console.log('miningEarning: ' + earning)
               resolve(earning)
             }).catch((e) => {
               reject(e)
