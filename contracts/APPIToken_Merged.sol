@@ -1,5 +1,6 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.20;
 
+// 0x130b31F22C5715c6da97B7BE0Fee174ba91794F0
 
 /**
  * @title Ownable
@@ -294,72 +295,189 @@ contract MinableToken is StandardToken, Ownable {
 }
 
 
-contract APPIToken is MinableToken {
-  string public name = "Application Incentive Token";
-  string public symbol = "APPIT";
-  uint256 public decimals = 18;
+contract AppManager is Ownable {
 
-  uint256 public initMiningEarning = 0;
-  uint256 public initMiningSpeed = 10 ** decimals;
-  uint256 public miningDifficulty = 1;
-  uint256 public maxMiningTime = 2 days;
+  struct Manager {
+    uint32 index;
+    bytes32 name;
+  }
 
-  uint256[] public miningSpeeds = [5 * 10 ** decimals, 10 ** decimals];
-  uint256[] public miningSpeedDurations = [2 years, 4 years];
+  mapping(address => Manager) private managers;
+  address[] private managerAddresses;
 
-  uint256 public startTime;
+  event AddManager(address indexed _address, uint32 _index, bytes32 _name);
+  event RemoveManager(address indexed _address, uint32 _index, bytes32 _name);
+  event UpdateManager(address indexed _address, uint32 _index, bytes32 _name);
 
+  function AppManager() public {
+    addManager(msg.sender, "__OWNER__");
+  }
+
+  function checkManager(address _address) internal view returns (bool) {
+    if (managerAddresses.length == 0) return false;
+    return managerAddresses[managers[_address].index] == _address;
+  }
+
+  modifier onlyManager() {
+    require(checkManager(msg.sender));
+    _;
+  }
+
+  function isManager(address _address) external view returns (bool) {
+    return checkManager(_address);
+  }
+
+  function addManager(address _address, bytes32 _name) public onlyOwner {
+    require(!checkManager(_address));
+    uint32 index = uint32(managerAddresses.push(_address) - 1);
+    managers[_address] = Manager(index, _name);
+    AddManager(_address, index, _name);
+    managerAddresses.push(_address);
+  }
+
+  function removeManager(address _address) public onlyOwner {
+    require(checkManager(_address));
+    uint32 index = managers[_address].index;
+    bytes32 name = managers[_address].name;
+    address last = managerAddresses[managerAddresses.length - 1];
+    managerAddresses[index] = last;
+    managers[last].index = index;
+    managerAddresses.length--;
+    RemoveManager(_address, index, name);
+    UpdateManager(last, index, managers[last].name);
+    delete managers[_address];
+  }
+
+  function updateManager(address _address, bytes32 _name) public onlyOwner {
+    require(checkManager(_address));
+    managers[_address].name = _name;
+    UpdateManager(_address, managers[_address].index, _name);
+  }
+
+  function getManagerCount() external view onlyOwner returns (uint32) {
+    return uint32(managerAddresses.length);
+  }
+
+  function getManager(address _address) external view onlyOwner returns (uint32, bytes32) {
+    require(checkManager(_address));
+    return (managers[_address].index, managers[_address].name);
+  }
+
+  function getManagerAt(uint32 _index) external view onlyOwner returns (address, uint32, bytes32) {
+    address managerAddress = managerAddresses[_index];
+    require(checkManager(managerAddress));
+    return (managerAddress, managers[managerAddress].index, managers[managerAddress].name);
+  }
+
+}
+
+
+contract AppDeveloper is AppManager {
+
+  struct Developer {
+    uint32 index;
+    bytes32 name;
+  }
+  
+  mapping(address => Developer) private developers;
+  address[] private developerAddresses;
+
+  event AddDeveloper(address indexed _address, uint32 _index, bytes32 _name);
+  event RemoveDeveloper(address indexed _address, uint32 _index, bytes32 _name);
+  event UpdateDeveloper(address indexed _address, uint32 _index, bytes32 _name);
+
+  function checkDeveloper(address _address) internal view returns (bool) {
+    if (developerAddresses.length == 0) return false;
+    return developerAddresses[developers[_address].index] == _address;
+  }
+
+  modifier onlyDeveloper() {
+    require(checkDeveloper(msg.sender));
+    _;
+  }
+
+  function isDeveloper(address _address) external view returns (bool) {
+    return checkDeveloper(_address);
+  }
+
+  function addDeveloper(address _address, bytes32 _name) public onlyManager {
+    require(!checkDeveloper(_address));
+    uint32 index = uint32(developerAddresses.push(_address) - 1);
+    developers[_address] = Developer(index, _name);
+    AddDeveloper(_address, index, _name);
+    developerAddresses.push(_address);
+  }
+
+  function removeDeveloper(address _address) public onlyManager {
+    require(checkDeveloper(_address));
+    uint32 index = developers[_address].index;
+    bytes32 name = developers[_address].name;
+    address last = developerAddresses[developerAddresses.length - 1];
+    developerAddresses[index] = last;
+    developers[last].index = index;
+    developerAddresses.length--;
+    RemoveDeveloper(_address, index, name);
+    UpdateDeveloper(last, index, developers[last].name);
+    delete developers[_address];
+  }
+
+  function updateDeveloper(address _address, bytes32 _name) public onlyManager {
+    require(checkDeveloper(_address));
+    developers[_address].name = _name;
+    UpdateDeveloper(_address, developers[_address].index, _name);
+  }
+
+  function getDeveloperCount() external view onlyManager returns (uint32) {
+    return uint32(developerAddresses.length);
+  }
+
+  function getDeveloper(address _address) external view onlyManager returns (uint32, bytes32) {
+    require(checkDeveloper(_address));
+    return (developers[_address].index, developers[_address].name);
+  }
+
+  function getDeveloperAt(uint32 _index) external view onlyManager returns (address, uint32, bytes32) {
+    address developerAddress = developerAddresses[_index];
+    require(checkDeveloper(developerAddress));
+    return (developerAddress, developers[developerAddress].index, developers[developerAddress].name);
+  }
+  
+}
+
+
+contract APPIPower is AppDeveloper {
+  using SafeMath for uint256;
+  
   uint256 initPower;
   uint256 powerSupply;
   mapping(address => uint256) powers;
+  bool mintingFinished = false;
 
-  mapping (address => uint256) miningEarnings;
-  mapping (address => uint256) lastMiningTimes;
+  struct TaskConfig {
+    uint32 oneOffQuota;
+    uint32 dailyQuota;
+  }
 
-  event Burn(address indexed burner, uint256 value);
-  event Mine(address indexed miner, uint256 value);
+  mapping (address => TaskConfig) private taskConfigs;
+
+  mapping (address => uint8[]) private oneOffTaskLists;
+  mapping (address => uint8[]) private dailyTaskLists;
+
+  mapping (address => bool[]) oneOffTasks;
+  mapping (address => uint[]) dailyTasks;
+
+  event MintFinished();
   event MintPower(address indexed to, uint256 amount);
-  event TransferPower(address indexed from, address indexed to, uint256 value);
 
-  function APPIToken(uint32 _capBase, uint32 _capDecimals, uint32 _initPower, uint32 _reservedPower) MinableToken(_capBase * 10 ** (_capDecimals + decimals)) public {
-    startTime = now;
+  event UpdateTaskConfig(address _developer, uint32 _oneOffQuota, uint32 _dailyQuota);
+  event UpdateOneOffTaskList(address _developer, uint8[] _powers);
+  event UpdateDailyTaskList(address _developer, uint8[] _powers);
+  event RewardFromOneOffTask(address _user, address _developer, uint _index, uint8 _power);
+  event RewardFromDailyTask(address _user, address _developer, uint _index, uint8 _power);
+
+  function APPIPower(uint32 _initPower, uint32 _reservedPower) public {
     initPower = _initPower;
     powerSupply = _reservedPower;
-  }
-
-  function setup(string _name, string _symbol, uint256 _decimals) external onlyOwner {
-    name = _name;
-    symbol = _symbol;
-    decimals - _decimals;
-  }
-
-  function setupMining(uint256 _initMiningEarning, uint256 _initMiningSpeed, uint256 _maxMiningTime) external onlyOwner {
-    initMiningEarning = _initMiningEarning;
-    initMiningSpeed = _initMiningSpeed;
-    maxMiningTime = _maxMiningTime;
-  }
-
-  function setupMiningSpeeds(uint256[] _miningSpeeds, uint256[] _miningSpeedDurations) external onlyOwner {
-    require(_miningSpeeds.length > 0 && _miningSpeeds.length == _miningSpeedDurations.length);
-    miningSpeeds = _miningSpeeds;
-    miningSpeedDurations = _miningSpeedDurations;
-  }
-
-  function getTotalSupply() external view returns (uint256) {
-    return totalSupply();
-  }
-
-  function getBalance() external view returns (uint256) {
-    return balanceOf(msg.sender);
-  }
-
-  function transferPower(address _to, uint256 _value) public returns (bool) {
-    require(_to != address(0));
-    require(_value <= powers[msg.sender]);
-    powers[msg.sender] = powers[msg.sender].sub(_value);
-    powers[_to] = powers[_to].add(_value);
-    TransferPower(msg.sender, _to, _value);
-    return true;
   }
 
   function powerOf(address _owner) public view returns (uint256) {
@@ -374,12 +492,142 @@ contract APPIToken is MinableToken {
     return powerOf(msg.sender);
   }
 
-  function mintPower(address _to, uint256 _amount) internal returns (bool) {
+  modifier canMint() {
+    require(!mintingFinished);
+    _;
+  }
+
+  function finishMinting() onlyOwner canMint public {
+    mintingFinished = true;
+    MintFinished();
+  }
+
+  function mintPower(address _to, uint256 _amount) internal canMint {
     powerSupply = powerSupply.add(_amount);
     powers[_to] = powers[_to].add(_amount);
     MintPower(_to, _amount);
-    TransferPower(address(0), _to, _amount);
-    return true;
+  }
+
+  function setTaskConfig(address _developer, uint32 _oneOffQuota, uint32 _dailyQuota) public onlyManager {
+    require(checkDeveloper(_developer));
+    taskConfigs[_developer].oneOffQuota = _oneOffQuota;
+    taskConfigs[_developer].dailyQuota = _dailyQuota;
+    UpdateTaskConfig(_developer, _oneOffQuota, _dailyQuota);
+  }
+
+  function checkQuota(uint8[] _powers, uint32 _quota) internal pure returns (bool) {
+    uint32 quota = 0;
+    for (uint i = 0; i < _powers.length; i++) {
+      quota += _powers[i];
+    }
+    return (quota <= _quota);
+  }
+
+  modifier underOneOffQuota(uint8[] _powers) {
+    require(checkDeveloper(msg.sender) && checkQuota(_powers, taskConfigs[msg.sender].oneOffQuota));
+    _;
+  }
+
+  modifier underDailyQuota(uint8[] _powers) {
+    require(checkDeveloper(msg.sender) && checkQuota(_powers, taskConfigs[msg.sender].dailyQuota));
+    _;
+  }
+
+  function setupOneOffTaskList(uint8[] powerRewards) public underOneOffQuota(powerRewards) {
+    oneOffTaskLists[msg.sender] = powerRewards;
+    UpdateOneOffTaskList(msg.sender, powerRewards);
+  }
+
+  function setupDailyTaskList(uint8[] powerRewards) public underDailyQuota(powerRewards) {
+    dailyTaskLists[msg.sender] = powerRewards;
+    UpdateDailyTaskList(msg.sender, powerRewards);
+  }
+
+  function rewardFromOneOffTask(address _developer, uint _index) public {
+    require(checkDeveloper(_developer));
+    require(_index < oneOffTaskLists[_developer].length);
+    if (oneOffTasks[msg.sender].length == 0) {
+      oneOffTasks[msg.sender].length = oneOffTaskLists[_developer].length;
+    }
+    require(!oneOffTasks[msg.sender][_index]);
+    uint8 powerReward = oneOffTaskLists[_developer][_index];
+    mintPower(msg.sender, powerReward);
+    oneOffTasks[msg.sender][_index] = true;
+    RewardFromOneOffTask(msg.sender, _developer, _index, powerReward);
+  }
+
+  function rewardFromDailyTask(address _developer, uint _index) public {
+    require(checkDeveloper(_developer));
+    require(_index < dailyTaskLists[_developer].length);
+    if (dailyTasks[msg.sender].length == 0) {
+      dailyTasks[msg.sender].length = dailyTaskLists[_developer].length;
+    }
+    uint today = now / 1 days;
+    require(dailyTasks[msg.sender][_index] < today);
+    uint8 powerReward = dailyTaskLists[_developer][_index];
+    mintPower(msg.sender, powerReward);
+    dailyTasks[msg.sender][_index] = today;
+    RewardFromDailyTask(msg.sender, _developer, _index, powerReward);
+  }
+
+}
+
+
+contract APPIToken is APPIPower, MinableToken {
+  string name = "Application Incentive Token";
+  string symbol = "APPIT";
+  uint256 decimals = 18;
+
+  uint256 initMiningEarning = 0;
+  uint256 initMiningSpeed = 10 ** decimals;
+  uint256 miningDifficulty = 1;
+  uint256 maxMiningTime = 2 days;
+
+  uint256[] miningSpeeds = [5 * 10 ** decimals, 10 ** decimals];
+  uint256[] miningSpeedDurations = [2 years, 4 years];
+
+  uint256 startTime;
+
+  mapping (address => uint256) miningEarnings;
+  mapping (address => uint256) lastMiningTimes;
+
+  event Burn(address indexed burner, uint256 value);
+  event Mine(address indexed miner, uint256 value);
+
+  function APPIToken(uint32 _capBase, uint32 _capDecimals, uint32 _initPower, uint32 _reservedPower)
+    APPIPower(_initPower, _reservedPower)
+    MinableToken(_capBase * 10 ** (_capDecimals + decimals))
+    public {
+    startTime = now;
+  }
+
+  function setup(string _name, string _symbol, uint256 _decimals)
+    external onlyOwner {
+    name = _name;
+    symbol = _symbol;
+    decimals - _decimals;
+  }
+
+  function setupMining(uint256 _initMiningEarning, uint256 _initMiningSpeed, uint256 _maxMiningTime)
+    external onlyOwner {
+    initMiningEarning = _initMiningEarning;
+    initMiningSpeed = _initMiningSpeed;
+    maxMiningTime = _maxMiningTime;
+  }
+
+  function setupMiningSpeeds(uint256[] _miningSpeeds, uint256[] _miningSpeedDurations)
+    external onlyOwner {
+    require(_miningSpeeds.length > 0 && _miningSpeeds.length == _miningSpeedDurations.length);
+    miningSpeeds = _miningSpeeds;
+    miningSpeedDurations = _miningSpeedDurations;
+  }
+
+  function getTotalSupply() external view returns (uint256) {
+    return totalSupply();
+  }
+
+  function getBalance() external view returns (uint256) {
+    return balanceOf(msg.sender);
   }
 
   /**
@@ -395,14 +643,6 @@ contract APPIToken is MinableToken {
     balances[burner] = balances[burner].sub(_value);
     totalSupply_ = totalSupply_.sub(_value);
     Burn(burner, _value);
-  }
-
-  function getStartTime() external view returns (uint256) {
-    return startTime;
-  }
-
-  function getTimeNow() external view returns (uint256) {
-    return now;
   }
 
   function miningSpeedOf(address _owner) public view returns (uint256) {

@@ -1,7 +1,8 @@
 import contract from 'truffle-contract'
 // import APPIToken from '../../build/contracts/APPIToken.json'
 import TokenABI from '../../build/APPIToken.json'
-const TokenAddress = '0x3158CC29483Ab7822a46718B7b2190f4105Ef7C3'
+// const TokenAddress = '0x3158CC29483Ab7822a46718B7b2190f4105Ef7C3'
+const TokenAddress = '0xD8eBae68E32B413298709b39c46dB87b1859Bde2'
 
 let appit = null
 class APPIT {

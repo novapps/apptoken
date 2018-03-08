@@ -11,7 +11,7 @@
               <div class="address">{{ user.coinbase }}</div>
               <div class="token">APPIT</div>
               <div class="balance">{{ user.tokenBalance }}</div>
-              <div class="power">APPTP</div>
+              <div class="power">APPIP</div>
               <div class="balance">{{ user.powerBalance }}</div>
               <div class="wallet">Mining Earning</div>
               <div class="balance">{{ user.miningEarning }}</div>
